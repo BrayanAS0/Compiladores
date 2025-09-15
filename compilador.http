@@ -1,0 +1,6 @@
+@compilador_HostAddress = http://localhost:5023
+
+GET {{compilador_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
