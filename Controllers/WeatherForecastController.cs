@@ -21,9 +21,12 @@ namespace compilador.Controllers
 
         [HttpGet]
 
-        public List<string> Analizar(string expresion)
+        public ActionResult Analizar(string expresion)
         {
             var tokens = new List<string>();
+            var tokenTypes = new List<string>();
+            var position = new List<int>();
+
             int i = 0;
             while (i < expresion.Length)
             {
@@ -32,14 +35,20 @@ namespace compilador.Controllers
                 {
                     case '+':
                         tokens.Add("+");
+                        tokenTypes.Add("Suma");
+                        position.Add(i);
                         i++;
                         break;
                     case '*':
                         tokens.Add("*");
+                        tokenTypes.Add("Multiplicacion");
+                        position.Add(i);
                         i++;
                         break;
                     case ';':
                         tokens.Add(";");
+                        tokenTypes.Add("punto y coma");
+                        position.Add(i);
                         i++;
                         break;
                         case ' ':
@@ -50,11 +59,15 @@ namespace compilador.Controllers
                         {
                             int start = i;
                             string number = "";
+                            tokenTypes.Add("Numero");
+                            position.Add(i);
                             while (i < expresion.Length && char.IsDigit(expresion[i]))
                             {
+
                                 number += expresion[i];
                                 i++;
                             }
+
                             tokens.Add(number);
                         }
                         else
@@ -65,7 +78,12 @@ namespace compilador.Controllers
                         break;
                 }
             }
-            return tokens;
+            return  new JsonResult ( new {
+                 tokens, 
+            position,
+            tokenTypes
+            
+            });
         }
 
 
