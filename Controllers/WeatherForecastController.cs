@@ -6,26 +6,25 @@ namespace compilador.Controllers
     [Route("[controller]/[action]")]
     public class WeatherForecastController : ControllerBase
     {
-        public enum TokenType
-        {
-            SUMA,           // +
-            MULT,           // *
-            PUNTOYCOMA,     // ;
-            PARENTESIS_IZQ, // (
-            PARENTESIS_DER, // )
-            NUMERO,         
-            IDENTIFICADOR,  
-            FIN,           
-            DESCONOCIDO     
-        }
+        //public enum TokenType
+        //{
+        //    SUMA,           // +
+        //    MULT,           // *
+        //    PUNTOYCOMA,     // ;
+        //    PARENTESIS_IZQ, // (
+        //    PARENTESIS_DER, // )
+        //    NUMERO,         
+  
+        //}
 
         [HttpGet]
 
-        public ActionResult Analizar(string expresion)
+        public IActionResult Analizar(string expresion)
         {
-            var tokens = new List<string>();
-            var tokenTypes = new List<string>();
-            var position = new List<int>();
+            //var tokens = new List<string>();
+            //var tokenTypes = new List<string>();
+            //var position = new List<int>();
+            var lista = new List<List<object>>();
 
             int i = 0;
             while (i < expresion.Length)
@@ -34,33 +33,65 @@ namespace compilador.Controllers
                 switch (c)
                 {
                     case '+':
-                        tokens.Add("+");
-                        tokenTypes.Add("Suma");
-                        position.Add(i);
+                        lista.Add(new List<object> {'+',"Suma",i});
+                        //tokens.Add("+");
+                        //tokenTypes.Add("Suma");
+                        //position.Add(i);
                         i++;
                         break;
                     case '*':
-                        tokens.Add("*");
-                        tokenTypes.Add("Multiplicacion");
-                        position.Add(i);
+                        lista.Add(new List<object> { '*', "Multiplicacion", i });
+
+                        //tokens.Add("*");
+                        //tokenTypes.Add("Multiplicacion");
+                        //position.Add(i);
                         i++;
                         break;
                     case ';':
-                        tokens.Add(";");
-                        tokenTypes.Add("punto y coma");
-                        position.Add(i);
+                        lista.Add(new List<object> { ';', "punto y coma", i });
+
+                        //tokens.Add(";");
+                        //tokenTypes.Add("punto y coma");
+                        //position.Add(i);
                         i++;
                         break;
-                        case ' ':
+                    case '(':
+                        lista.Add(new List<object> { ')', "Parentesis izquierdo", i });
+
+                        //tokens.Add("(");
+                        //tokenTypes.Add("Parentesis izquierdo");
+                        //position.Add(i);
+                        i++;
+                        break;
+                    case ')':
+                        lista.Add(new List<object> { '(', "Parentesis Derecho", i });
+
+                        //tokens.Add(")");
+                        //tokenTypes.Add("parentesis derecho");
+                        //position.Add(i);
+                        i++;
+                        break;
+                    case '-':
+                        lista.Add(new List<object> { '-', "Resta", i });
+
+                        //tokens.Add("-");
+                        //tokenTypes.Add("Resta");
+                        //position.Add(i);
+                        i++;
+                        break;
+                    case ' ':
                         i++;
                         break;
                     default:
                         if (char.IsDigit(c))
                         {
+
                             int start = i;
                             string number = "";
-                            tokenTypes.Add("Numero");
-                            position.Add(i);
+                            lista.Add(new List<object> { "", "Numero", i });
+
+                            //tokenTypes.Add("Numero");
+                            //position.Add(i);
                             while (i < expresion.Length && char.IsDigit(expresion[i]))
                             {
 
@@ -68,25 +99,26 @@ namespace compilador.Controllers
                                 i++;
                             }
 
-                            tokens.Add(number);
+                            //tokens.Add(number);
+                            lista.Last()[0] = number;
                         }
                         else
                         {
-                            //tokens.Add(TokenType.DESCONOCIDO);
                             i++;
                         }
                         break;
                 }
             }
-            return  new JsonResult ( new {
-                 tokens, 
-            position,
-            tokenTypes
-            
-            });
+            //return  new JsonResult ( new {
+            //     tokens, 
+            //position,
+            //tokenTypes
+        //});
+                    return  Ok(lista);
+
         }
 
 
 
-    }
+}
 }
