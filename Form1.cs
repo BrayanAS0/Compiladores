@@ -80,7 +80,7 @@ namespace Compliadores_Form
             foreach (var token in resultado)
             {
                 Console.WriteLine(token);
-                dataGridView1.Rows.Add(token[2], token[0], token[1]); 
+                dataGridView1.Rows.Add(token.Posicion, token.Lexema, token.Tipo); 
             }
         }
 

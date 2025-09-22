@@ -1,113 +1,93 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Compliadores_Form
 {
     public class Compiladores
     {
-
-
-        public List<List<object>> Analizar(string expresion)
+        public enum TokenType
         {
-            //var tokens = new List<string>();
-            //var tokenTypes = new List<string>();
-            //var position = new List<int>();
-            var lista = new List<List<object>>();
+            Suma,
+            Resta,
+            Multiplicacion,
+            Division,
+            PuntoYComa,
+            ParentesisIzquierdo,
+            ParentesisDerecho,
+            Numero,
+            Comentario,
+            Error
+        }
 
+
+        public List<Token> Analizar(string expresion)
+        {
+            var lista = new List<Token>();
             int i = 0;
             while (i < expresion.Length)
             {
+                if (i + 1 < expresion.Length && expresion[i] == '/' && expresion[i + 1] == '/')
+                {
+                    int inicio = i;
+                    int buscarDesde = i + 2;
+                    int cierre = expresion.IndexOf("//", buscarDesde);
+                    if (cierre == -1)
+                    {
+                        string comentario = expresion.Substring(inicio);
+                        lista.Add(new Token(TokenType.Error, "Error", inicio));
+                        break;
+                    }
+                    else
+                    {
+                        string comentario = expresion.Substring(inicio, cierre + 2 - inicio);
+                        lista.Add(new Token(TokenType.Comentario, comentario, inicio));
+                        i = cierre + 2;
+                        continue;
+                    }
+                }
                 char c = expresion[i];
                 switch (c)
                 {
                     case '+':
-                        lista.Add(new List<object> { '+', "Suma", i });
-                        //tokens.Add("+");
-                        //tokenTypes.Add("Suma");
-                        //position.Add(i);
-                        i++;
-                        break;
-                    case '*':
-                        lista.Add(new List<object> { '*', "Multiplicacion", i });
-
-                        //tokens.Add("*");
-                        //tokenTypes.Add("Multiplicacion");
-                        //position.Add(i);
-                        i++;
-                        break;
-                    case ';':
-                        lista.Add(new List<object> { ';', "punto y coma", i });
-
-                        //tokens.Add(";");
-                        //tokenTypes.Add("punto y coma");
-                        //position.Add(i);
-                        i++;
-                        break;
-                    case '(':
-                        lista.Add(new List<object> { ')', "Parentesis izquierdo", i });
-
-                        //tokens.Add("(");
-                        //tokenTypes.Add("Parentesis izquierdo");
-                        //position.Add(i);
-                        i++;
-                        break;
-                    case ')':
-                        lista.Add(new List<object> { '(', "Parentesis Derecho", i });
-
-                        //tokens.Add(")");
-                        //tokenTypes.Add("parentesis derecho");
-                        //position.Add(i);
-                        i++;
+                        lista.Add(new Token(TokenType.Suma, "+", i));
                         break;
                     case '-':
-                        lista.Add(new List<object> { '-', "Resta", i });
-
-                        //tokens.Add("-");
-                        //tokenTypes.Add("Resta");
-                        //position.Add(i);
-                        i++;
+                        lista.Add(new Token(TokenType.Resta, "-", i));
+                        break;
+                    case '*':
+                        lista.Add(new Token(TokenType.Multiplicacion, "*", i));
+                        break;
+                    case '/':
+                        lista.Add(new Token(TokenType.Division, "/", i));
+                        break;
+                    case ';':
+                        lista.Add(new Token(TokenType.PuntoYComa, ";", i));
+                        break;
+                    case '(':
+                        lista.Add(new Token(TokenType.ParentesisIzquierdo, "(", i));
+                        break;
+                    case ')':
+                        lista.Add(new Token(TokenType.ParentesisDerecho, ")", i));
                         break;
                     case ' ':
-                        i++;
-                        break;
+                        break; // ignorar espacios
                     default:
                         if (char.IsDigit(c))
                         {
-
                             int start = i;
                             string number = "";
-                            lista.Add(new List<object> { "", "Numero", i });
-
-                            //tokenTypes.Add("Numero");
-                            //position.Add(i);
                             while (i < expresion.Length && char.IsDigit(expresion[i]))
                             {
-
                                 number += expresion[i];
                                 i++;
                             }
-
-                            //tokens.Add(number);
-                            lista.Last()[0] = number;
+                            lista.Add(new Token(TokenType.Numero, number, start));
+                            continue; 
                         }
-                        else
-                        {
-                            i++;
-                        }
-                        break;
+                        break; 
                 }
+                i++;
             }
-            //return  new JsonResult ( new {
-            //     tokens, 
-            //position,
-            //tokenTypes
-            //});
             return lista;
-
         }
-
     }
+
 }
