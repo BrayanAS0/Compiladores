@@ -36,7 +36,7 @@ namespace Compliadores_Form
             {
                 archivoActual = dlg.FileName;
                 textBox2.Text = archivoActual; 
-                textBox1.Text = System.IO.File.ReadAllText(archivoActual); 
+                richTextBox1.Text = System.IO.File.ReadAllText(archivoActual); 
             }
         }
 
@@ -48,7 +48,7 @@ namespace Compliadores_Form
         {
             if (!string.IsNullOrEmpty(archivoActual))
             {
-                System.IO.File.WriteAllText(archivoActual, textBox1.Text);
+                System.IO.File.WriteAllText(archivoActual, richTextBox1.Text);
                 MessageBox.Show("Archivo guardado correctamente.");
             }
             else
@@ -57,7 +57,7 @@ namespace Compliadores_Form
                 dlg.Filter = "Archivo de texto|*.txt|Todos los archivos|*.*";
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    System.IO.File.WriteAllText(dlg.FileName, textBox1.Text);
+                    System.IO.File.WriteAllText(dlg.FileName, richTextBox1.Text);
                     archivoActual = dlg.FileName;
                     textBox2.Text = archivoActual;
                     MessageBox.Show("Archivo guardado correctamente.");
@@ -72,7 +72,7 @@ namespace Compliadores_Form
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var resultado = compiladores.Analizar(textBox1.Text);
+            var resultado = compiladores.Analizar(richTextBox1.Text);
 
             dataGridView1.Rows.Clear();
 
