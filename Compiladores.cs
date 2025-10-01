@@ -1,53 +1,158 @@
 ﻿
+
 namespace Compliadores_Form
 {
+
+
     public class Compiladores
     {
         public enum TokenType
         {
+            // Operadores
             Suma,
             Resta,
             Multiplicacion,
             Division,
+            Modulo,
+            Igual,
+
+            // Simbolos
             PuntoYComa,
+            DosPuntos,
             ParentesisIzquierdo,
             ParentesisDerecho,
+            CorcheteIzquierdo,
+            CorcheteRerecho,
+            Punto,
+            Coma,
+            Asignacion,
+
+            // Literales
             Numero,
+            String,
+            Identificador,
             Comentario,
+
+            // Palabras clave
+            Program,
+            Begin,
+            End,
+            Type,
+            Var,
+            Procedure,
+            Function,
+            If,
+            Then,
+            Else,
+            While,
+            Do,
+            Array,
+            Of,
+            Integer,
+            Boolean,
+            True,
+            False,
+
+
             Error
         }
 
+        private static readonly Dictionary<string, TokenType> PalabrasClave = new Dictionary<string, TokenType>
+        {
+            { "program", TokenType.Program },
+            { "begin", TokenType.Begin },
+            { "end", TokenType.End },
+            { "type", TokenType.Type },
+            { "var", TokenType.Var },
+            { "procedure", TokenType.Procedure },
+            { "function", TokenType.Function },
+            { "if", TokenType.If },
+            { "then", TokenType.Then },
+            { "else", TokenType.Else },
+            { "while", TokenType.While },
+            { "do", TokenType.Do },
+            { "array", TokenType.Array },
+            { "of", TokenType.Of },
+            { "integer", TokenType.Integer },
+            { "boolean", TokenType.Boolean },
+            { "true", TokenType.True },
+            { "false", TokenType.False }
+        };
 
         public List<Token> Analizar(string expresion)
         {
             var lista = new List<Token>();
             int i = 0;
+
             while (i < expresion.Length)
             {
+                if (char.IsWhiteSpace(expresion[i]) || i=='\n')
+                {
+                    i++;
+                    continue;
+                }
+
+                // Comentarios 
                 if (i + 1 < expresion.Length && expresion[i] == '/' && expresion[i + 1] == '/')
                 {
-                    int inicio = i;
-                    int buscarDesde = i + 2;
-                    int cierre = expresion.IndexOf("//", buscarDesde);
-                    if (cierre == -1)
+                    var comentario = LeerComentario(expresion, i);
+                    if (comentario != null)
                     {
-                        string comentario = expresion.Substring(inicio);
-                        lista.Add(new Token(TokenType.Error, "Error", inicio));
-                        break;
+                        lista.Add(comentario.Value.token);
+                        i = comentario.Value.nuevaPos;
+                        continue;
                     }
                     else
                     {
-                        string comentario = expresion.Substring(inicio, cierre + 2 - inicio);
-                        lista.Add(new Token(TokenType.Comentario, comentario, inicio));
-                        i = cierre + 2;
-                        continue;
+                        lista.Add(new Token(TokenType.Error, "Comentario sin cerrar", i));
+                        break;
                     }
                 }
+
+                //  identificadores y palabras clave
+                if (char.IsLetter(expresion[i]) )
+                {
+                    var identificador = LeerIdentificador(expresion, i);
+                    lista.Add(identificador.token);
+                    i = identificador.nuevaPos;
+                    continue;
+                }
+
+                // numeros
+                if (char.IsDigit(expresion[i]))
+                {
+                    var numero = LeerNumero(expresion, i);
+                    lista.Add(numero.token);
+                    i = numero.nuevaPos;
+                    continue;
+                }
+
+                // strings
+                if (expresion[i] == '"')
+                {
+                    var texto = LeerString(expresion, i);
+                    if (texto != null)
+                    {
+                        lista.Add(texto.Value.token);
+                        i = texto.Value.nuevaPos;
+                        continue;
+                    }
+                    else
+                    {
+                        lista.Add(new Token(TokenType.Error, "String sin cerrar", i));
+                        break;
+                    }
+                }
+
+                //  operadores y simbolos
                 char c = expresion[i];
                 switch (c)
                 {
                     case '+':
                         lista.Add(new Token(TokenType.Suma, "+", i));
+                        break;
+                    case '=':
+                        lista.Add(new Token(TokenType.Igual, "=", i));
                         break;
                     case '-':
                         lista.Add(new Token(TokenType.Resta, "-", i));
@@ -58,8 +163,22 @@ namespace Compliadores_Form
                     case '/':
                         lista.Add(new Token(TokenType.Division, "/", i));
                         break;
+                    case '%':
+                        lista.Add(new Token(TokenType.Modulo, "%", i));
+                        break;
                     case ';':
                         lista.Add(new Token(TokenType.PuntoYComa, ";", i));
+                        break;
+                    case ':':
+                        if (i + 1 < expresion.Length && expresion[i + 1] == '=')
+                        {
+                            lista.Add(new Token(TokenType.Asignacion, ":=", i));
+                            i++; 
+                        }
+                        else
+                        {
+                            lista.Add(new Token(TokenType.DosPuntos, ":", i));
+                        }
                         break;
                     case '(':
                         lista.Add(new Token(TokenType.ParentesisIzquierdo, "(", i));
@@ -67,27 +186,114 @@ namespace Compliadores_Form
                     case ')':
                         lista.Add(new Token(TokenType.ParentesisDerecho, ")", i));
                         break;
-                    case ' ':
-                        break; // ignorar espacios
+                    case '[':
+                        lista.Add(new Token(TokenType.CorcheteIzquierdo, "[", i));
+                        break;
+                    case ']':
+                        lista.Add(new Token(TokenType.CorcheteRerecho, "]", i));
+                        break;
+                    case '.':
+                        lista.Add(new Token(TokenType.Punto, ".", i));
+                        break;
+                    case ',':
+                        lista.Add(new Token(TokenType.Coma, ",", i));
+                        break;
                     default:
-                        if (char.IsDigit(c))
-                        {
-                            int start = i;
-                            string number = "";
-                            while (i < expresion.Length && char.IsDigit(expresion[i]))
-                            {
-                                number += expresion[i];
-                                i++;
-                            }
-                            lista.Add(new Token(TokenType.Numero, number, start));
-                            continue; 
-                        }
-                        break; 
+                        lista.Add(new Token(TokenType.Error, $"Caracter no reconocido: {c}", i));
+                        break;
                 }
                 i++;
             }
+
             return lista;
         }
-    }
 
+        private (Token token, int nuevaPos)? LeerComentario(string texto, int i)
+        {
+            int inicio = i;
+            int buscarDesde = i + 2;
+            int cierre = texto.IndexOf("//", buscarDesde);
+
+            if (cierre == -1)
+            {
+
+                return null;
+
+            }
+            else
+            {
+                string comentario = texto.Substring(inicio, cierre + 2 - inicio);
+                return (new Token(TokenType.Comentario, comentario, inicio), cierre + 2);
+            }
+        }
+
+        private (Token token, int nuevaPos) LeerIdentificador(string texto, int i)
+        {
+            int inicio = i;
+            string lexema = "";
+
+            while (i < texto.Length && char.IsLetterOrDigit(texto[i]))
+            {
+                lexema += texto[i];
+                i++;
+            }
+
+            //  palabra clave
+            string lexemaLower = lexema.ToLower();
+            if (PalabrasClave.ContainsKey(lexemaLower))
+            {
+                return (new Token(PalabrasClave[lexemaLower], lexema, inicio), i);
+            }
+            else
+            {
+                return (new Token(TokenType.Identificador, lexema, inicio), i);
+            }
+        }
+
+        private (Token token, int nuevaPos) LeerNumero(string texto, int i)
+        {
+            int inicio = i;
+            string numero = "";
+
+            while (i < texto.Length && char.IsDigit(texto[i]))
+            {
+                numero += texto[i];
+                i++;
+            }
+
+            if (i < texto.Length && texto[i] == '.')
+            {
+                numero += '.';
+                i++;
+                while (i < texto.Length && char.IsDigit(texto[i]))
+                {
+                    numero += texto[i];
+                    i++;
+                }
+            }
+
+            return (new Token(TokenType.Numero, numero, inicio), i);
+        }
+
+        private (Token token, int nuevaPos)? LeerString(string texto, int i)
+        {
+            int inicio = i;
+            i++; 
+            string valor = "";
+
+            while (i < texto.Length && texto[i] != '"')
+            {
+                valor += texto[i];
+                i++;
+            }
+
+            if (i >= texto.Length)
+            {
+                return null;
+            }
+
+            i++; 
+            return (new Token(TokenType.String, valor, inicio), i);
+        }
+    }
 }
