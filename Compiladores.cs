@@ -239,10 +239,10 @@ namespace Compliadores_Form
             }
 
             //  palabra clave
-            string lexemaLower = lexema.ToLower();
-            if (PalabrasClave.ContainsKey(lexemaLower))
+          //  string lexemaLower = lexema.ToLower(); /// revisar si acoeta sensilCase
+            if (PalabrasClave.ContainsKey(lexema))
             {
-                return (new Token(PalabrasClave[lexemaLower], lexema, inicio), i);
+                return (new Token(PalabrasClave[lexema], lexema, inicio), i);
             }
             else
             {
