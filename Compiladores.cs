@@ -200,7 +200,7 @@ namespace Compliadores_Form
                         break;
                     default:
                         lista.Add(new Token(TokenType.Error, $"Caracter no reconocido: {c}", i));
-                        break;
+                        return lista;
                 }
                 i++;
             }
