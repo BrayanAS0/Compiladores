@@ -60,6 +60,7 @@ namespace Compliadores_Form
         private static readonly Dictionary<string, TokenType> PalabrasClave = new Dictionary<string, TokenType>
         {
             { "program", TokenType.Program },
+            {"string",TokenType.String },
             { "begin", TokenType.Begin },
             { "end", TokenType.End },
             { "type", TokenType.Type },
@@ -78,7 +79,6 @@ namespace Compliadores_Form
             { "true", TokenType.True },
             { "false", TokenType.False }
         };
-
         public List<Token> Analizar(string expresion)
         {
             var lista = new List<Token>();
@@ -86,13 +86,13 @@ namespace Compliadores_Form
 
             while (i < expresion.Length)
             {
-                if (char.IsWhiteSpace(expresion[i]) || i=='\n')
+                if (char.IsWhiteSpace(expresion[i]) || expresion[i] == '\n')
                 {
                     i++;
                     continue;
                 }
 
-                // Comentarios 
+                // Comentarios
                 if (i + 1 < expresion.Length && expresion[i] == '/' && expresion[i + 1] == '/')
                 {
                     var comentario = LeerComentario(expresion, i);
@@ -109,8 +109,8 @@ namespace Compliadores_Form
                     }
                 }
 
-                //  identificadores y palabras clave
-                if (char.IsLetter(expresion[i]) )
+                // Identificadores y palabras clave
+                if (char.IsLetter(expresion[i]))
                 {
                     var identificador = LeerIdentificador(expresion, i);
                     lista.Add(identificador.token);
@@ -118,7 +118,7 @@ namespace Compliadores_Form
                     continue;
                 }
 
-                // numeros
+                // Números
                 if (char.IsDigit(expresion[i]))
                 {
                     var numero = LeerNumero(expresion, i);
@@ -127,7 +127,7 @@ namespace Compliadores_Form
                     continue;
                 }
 
-                // strings
+                // Strings
                 if (expresion[i] == '"')
                 {
                     var texto = LeerString(expresion, i);
@@ -144,7 +144,7 @@ namespace Compliadores_Form
                     }
                 }
 
-                //  operadores y simbolos
+                // Operadores y símbolos
                 char c = expresion[i];
                 switch (c)
                 {
@@ -173,7 +173,7 @@ namespace Compliadores_Form
                         if (i + 1 < expresion.Length && expresion[i + 1] == '=')
                         {
                             lista.Add(new Token(TokenType.Asignacion, ":=", i));
-                            i++; 
+                            i++;
                         }
                         else
                         {
@@ -226,7 +226,6 @@ namespace Compliadores_Form
                 return (new Token(TokenType.Comentario, comentario, inicio), cierre + 2);
             }
         }
-
         private (Token token, int nuevaPos) LeerIdentificador(string texto, int i)
         {
             int inicio = i;
@@ -239,10 +238,10 @@ namespace Compliadores_Form
             }
 
             //  palabra clave
-          //  string lexemaLower = lexema.ToLower(); /// revisar si acoeta sensilCase
-            if (PalabrasClave.ContainsKey(lexema))
+            string lexemaLower = lexema.ToLower();
+            if (PalabrasClave.ContainsKey(lexemaLower))
             {
-                return (new Token(PalabrasClave[lexema], lexema, inicio), i);
+                return (new Token(PalabrasClave[lexemaLower], lexema, inicio), i);
             }
             else
             {
@@ -272,8 +271,25 @@ namespace Compliadores_Form
                 }
             }
 
+            if (i < texto.Length && (texto[i] == 'e' || texto[i] == 'E'))
+            {
+                numero += texto[i];
+                i++;
+                if (i < texto.Length && (texto[i] == '+' || texto[i] == '-'))
+                {
+                    numero += texto[i];
+                    i++;
+                }
+                while (i < texto.Length && char.IsDigit(texto[i]))
+                {
+                    numero += texto[i];
+                    i++;
+                }
+            }
+
             return (new Token(TokenType.Numero, numero, inicio), i);
         }
+
 
         private (Token token, int nuevaPos)? LeerString(string texto, int i)
         {
