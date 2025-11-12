@@ -26,7 +26,7 @@ namespace Compliadores_Form
 
         }
 
-        string archivoActual = ""; 
+        string archivoActual = "";
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -35,8 +35,8 @@ namespace Compliadores_Form
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 archivoActual = dlg.FileName;
-                textBox2.Text = archivoActual; 
-                richTextBox1.Text = System.IO.File.ReadAllText(archivoActual); 
+                textBox2.Text = archivoActual;
+                richTextBox1.Text = System.IO.File.ReadAllText(archivoActual);
             }
         }
 
@@ -72,17 +72,8 @@ namespace Compliadores_Form
 
         private void button3_Click(object sender, EventArgs e)
         {
-            var resultado = compiladores.Analizar(richTextBox1.Text);
 
-            dataGridView1.Rows.Clear();
-
-
-            foreach (var token in resultado)
-            {
-                Console.WriteLine(token);
-                dataGridView1.Rows.Add(token.Posicion, token.Lexema, token.Tipo); 
-            }
+            compiladores.AnalizarYMostrarEnTabla(richTextBox1.Text, dataGridView1);
         }
-
     }
-}
+    }

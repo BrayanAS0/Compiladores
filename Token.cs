@@ -1,19 +1,19 @@
 ﻿
-using static Compliadores_Form.Compiladores;
+using Compliadores_Form;
 
-namespace Compliadores_Form
+public class Token
 {
-    public class Token
+    public Compiladores.TokenType Tipo { get; }
+    public string Lexema { get; }
+    public int Posicion { get; }
+    public Token(Compiladores.TokenType tipo, string lexema, int posicion)
     {
-        public TokenType Tipo { get; set; }
-        public string Lexema { get; set; }
-        public int Posicion { get; set; }
-
-        public Token(TokenType tipo, string lexema, int posicion)
-        {
-            Tipo = tipo;
-            Lexema = lexema;
-            Posicion = posicion;
-        }
+        Tipo = tipo;
+        Lexema = lexema;
+        Posicion = posicion;
+    }
+    public override string ToString()
+    {
+        return $"Tipo: {Tipo}, Lexema: '{Lexema}', Posición: {Posicion}";
     }
 }
